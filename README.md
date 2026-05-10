@@ -1,1 +1,105 @@
-# Omni-Agent
+# Omni-Agent 🤖📦
+
+Omni-Agent, WhatsApp üzerinden gelen müşteri taleplerini insan müdahalesi olmadan, **%100 otonom** bir şekilde yönetmesini sağlayan yapay zeka (LLM) destekli bir müşteri ve sipariş yönetim sistemidir. 
+
+Sistem klasik, kural tabanlı chatbotların aksine; müşterinin doğal dildeki niyetini anlayan, arka plandaki veritabanından veri çekme kararını kendisi veren ve işlem sonuçlarını yine doğal ve empatik bir metne dönüştüren **"Agentic (Otonom Araç Kullanımı - Function Calling)"** bir mimariye dayanır.
+
+---
+
+## 🚀 Temel Özellikler
+* **Otonom Müşteri Temsilcisi:** Gemini AI, sipariş durumunu veya stok sayısını anlamak için fonksiyon tetiklemeyi (Tool Use) kendisi seçer.
+* **WhatsApp Entegrasyonu:** Twilio API webhook üzerinden direkt WhatsApp entegrasyonu mevcuttur. Müşterileriniz bir uygulamaya girmeden sizinle konuşur.
+* **Canlı Veritabanı:** Supabase (PostgreSQL) üzerinden stok sorgusu ve sipariş kaydı okuma yeteneği.
+* **Modern Dashboard:** React ve TailwindCSS ile tasarlanmış, mağaza yöneticileri için modern ve hızlı Admin Paneli.
+
+---
+
+## 🛠 Kullanılan Teknolojiler (Tech Stack)
+
+### Backend
+* **Python (FastAPI):** Yüksek performanslı ve asenkron webhook altyapısı.
+* **Google Gemini API:** `gemini-2.5-flash` modeli ile anlamsal analiz ve Function Calling yeteneği.
+* **Twilio:** WhatsApp mesajlarını almak ve göndermek için HTTP köprüsü.
+* **Supabase Client:** Veritabanına asenkron bağlantı aracı.
+
+### Frontend
+* **React + Vite:** Ultra hızlı derleme ve modüler modern UI.
+* **TailwindCSS (v4):** Özel tasarlanmış stil ve komponent yönetimi.
+
+---
+
+## 📂 Proje Mimarisi (Pipeline)
+
+1. **Müşteri** bir WhatsApp mesajı yollar.
+2. **Twilio**, bu mesajı yakalayıp ngrok aracılığıyla **FastAPI** webhook'una `POST` eder.
+3. FastAPI, gelen bağlamı ve telefon numarasını **Gemini AI** modeline besler.
+4. Gemini, mesajın niyetine göre uygun Aracı (Tool) tetikler: `check_order_status`, `check_inventory` veya `create_support_ticket`.
+5. Arka planda **Supabase**'e bağlanılır ve istenen veri (Örn: "Domates, 120 adet") çekilir.
+6. Gemini, dönen soğuk veriyi okuyup insan dilinde, sıcak bir Türkçe mesaja çevirir.
+7. Yanıt **Twilio** üzerinden müşteriye WhatsApp'tan ulaştırılır.
+
+---
+
+## ⚙️ Kurulum ve Çalıştırma Rehberi
+
+Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları sırasıyla uygulayın.
+
+### 1. Gereksinimler
+* Python 3.9+
+* Node.js (v18+)
+* [Ngrok](https://ngrok.com/) hesabı
+* Supabase, Google Gemini ve Twilio API Anahtarları
+
+### 2. Depoyu İndirme (Clone)
+```bash
+git clone https://github.com/KULLANICI_ADINIZ/omni-agent.git
+cd omni-agent
+```
+
+### 3. Backend (API) Kurulumu
+Backend klasörüne gidin ve gerekli Python kütüphanelerini kurun:
+```bash
+cd backend
+pip install -r requirements.txt
+```
+Ardından `backend/.env.example` dosyasının adını `.env` olarak değiştirin ve kendi bilgilerinizi doldurun:
+```env
+SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
+SUPABASE_KEY=YOUR_SUPABASE_ANON_KEY
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+```
+Sunucuyu başlatın:
+```bash
+python -m uvicorn main:app --reload --port 8080
+```
+
+### 4. Frontend (Dashboard) Kurulumu
+Yeni bir terminal açıp frontend klasörüne girin:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Dashboard `http://localhost:5173` adresinde çalışacaktır.
+
+### 5. Twilio (WhatsApp) Bağlantısı
+Yerel sunucunuzu internete açmak için farklı bir terminalde ngrok başlatın:
+```bash
+ngrok http 8080
+```
+Twilio Console > Messaging > Send a WhatsApp message > Sandbox Settings sekmesine gidip **WHEN A MESSAGE COMES IN** bölümüne Ngrok adresinizi ekleyin:
+`https://<SİZİN-NGROK-ADRESİNİZ>/api/webhook/whatsapp`
+
+---
+
+## 📊 Veritabanı Tabloları (Supabase)
+Projeyi Supabase'de denemek için aşağıdaki gibi SQL şeması oluşturabilirsiniz:
+
+* **`products`**: id, name, stock_quantity, price
+* **`orders`**: id, customer_phone, status (Örn: 'kargoda')
+* **`tickets`**: id, customer_phone, issue_description, status
+
+---
+
+## 👨‍💻 Geliştirici Bilgileri
+Bu proje bir Hackathon/Akademi girişimi konsepti kapsamında tasarlanmıştır. Tamamen asenkron yapıda çalışmakta ve kolaylıkla yatayda (scale) büyütülebilmektedir. Katkı sağlamak isterseniz (PR/Issue) her zaman bekleriz!
