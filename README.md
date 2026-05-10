@@ -74,10 +74,18 @@ python -m uvicorn main:app --reload --port 8080
 ```
 
 ### 4. Frontend (Dashboard) Kurulumu
-Yeni bir terminal açıp frontend klasörüne girin:
+Yeni bir terminal açıp frontend klasörüne girin ve kütüphaneleri kurun:
 ```bash
 cd frontend
 npm install
+```
+Ardından `frontend/.env.example` dosyasının adını `.env` olarak değiştirin ve Supabase bilgilerinizi girin:
+```env
+VITE_SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
+VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+```
+Dashboard'u başlatın:
+```bash
 npm run dev
 ```
 Dashboard `http://localhost:5173` adresinde çalışacaktır.
@@ -103,3 +111,17 @@ Projeyi Supabase'de denemek için aşağıdaki gibi SQL şeması oluşturabilirs
 
 ## 👨‍💻 Geliştirici Bilgileri
 Bu proje bir Hackathon/Akademi girişimi konsepti kapsamında tasarlanmıştır. Tamamen asenkron yapıda çalışmakta ve kolaylıkla yatayda (scale) büyütülebilmektedir. Katkı sağlamak isterseniz (PR/Issue) her zaman bekleriz!
+
+---
+
+## ✅ Son Güncellemeler & İyileştirmeler
+
+### 🖥️ Gelişmiş Dashboard (Admin Paneli)
+*   **Real-time Veri Akışı:** Supabase Realtime (Postgres Changes) kullanılarak sayfa yenilenmeden anlık stok değişimleri ve yeni siparişler ekrana yansıtılır.
+*   **Premium UI/UX:** `framer-motion` ile akıcı geçişler, `lucide-react` ile modern ikon seti ve koyu tema (dark mode) odaklı cam (glassmorphism) tasarımı.
+*   **Dinamik İstatistikler:** Toplam sipariş, açık talepler ve kritik stok seviyeleri anlık olarak hesaplanır ve görsel kartlarla sunulur.
+
+### ⚙️ Akıllı Agent Yetenekleri
+*   **Otonom Sipariş Verme:** `place_order_tool` ile müşteriler artık WhatsApp üzerinden direkt sipariş verebilir. Sistem otomatik olarak stok kontrolü yapar ve bakiyeyi düşer.
+*   **Hata Yönetimi:** Ürün bulunamadığında veya stok yetersiz olduğunda Gemini, müşteriye nazik ve alternatif sunan yanıtlar verir.
+*   **Gelişmiş Veritabanı Mantığı:** `database.py` içerisinde CRUD işlemleri asenkron ve güvenli hale getirilmiştir.
