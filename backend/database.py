@@ -51,3 +51,51 @@ def create_ticket(customer_phone: str, issue_description: str) -> dict:
         return {"status": "error", "message": "Destek talebi oluşturulamadı."}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+
+def place_order(customer_phone: str, product_name: str, quantity: int = 1) -> dict:
+    """Places an order, decrements stock, and records the order."""
+    try:
+        # 1. Find the product
+        product_response = supabase.table("products").select("*").ilike("name", f"%{product_name}%").execute()
+        product_data = product_response.data
+        
+        if not product_data:
+            return {"status": "not_found", "message": f"{product_name} isimli ürün bulunamadı."}
+        
+        product = product_data[0]
+        product_id = product["id"]
+        current_stock = product.get("stock_quantity") or product.get("stock", 0)
+        price = product.get("price", 0)
+        
+        # 2. Check stock
+        if current_stock < quantity:
+            return {"status": "insufficient_stock", "message": f"Üzgünüm, stokta sadece {current_stock} adet {product_name} var."}
+        
+        # 3. Decrement stock
+        new_stock = current_stock - quantity
+        supabase.table("products").update({"stock_quantity": new_stock}).eq("id", product_id).execute()
+        
+        # 4. Create order
+        import random
+        order_number = f"ORD-{random.randint(1000, 9999)}"
+        total_amount = float(price) * quantity
+        
+        order_response = supabase.table("orders").insert({
+            "order_number": order_number,
+            "customer_phone": customer_phone,
+            "status": "pending",
+            "total_amount": total_amount
+        }).execute()
+        
+        if order_response.data:
+            return {
+                "status": "success", 
+                "message": f"Siparişiniz başarıyla alındı! Sipariş No: {order_number}",
+                "order": order_response.data[0]
+            }
+        return {"status": "error", "message": "Sipariş oluşturulurken bir hata oluştu."}
+        
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
