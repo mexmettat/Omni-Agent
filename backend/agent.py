@@ -2,7 +2,7 @@ import os
 import json
 import google.generativeai as genai
 from dotenv import load_dotenv
-from database import get_order_status, get_product_inventory, create_ticket
+from database import get_order_status, get_product_inventory, create_ticket, place_order
 
 load_dotenv()
 
@@ -48,17 +48,32 @@ def create_support_ticket(phone_number: str, description: str) -> str:
     result = create_ticket(phone_number, description)
     return json.dumps(result, ensure_ascii=False)
 
+def place_order_tool(phone_number: str, product_name: str, quantity: int = 1) -> str:
+    """
+    Müşterinin istediği üründen sipariş oluşturur ve stoktan düşer.
+    
+    Args:
+        phone_number: Müşterinin telefon numarası.
+        product_name: Sipariş edilecek ürünün adı.
+        quantity: Kaç adet sipariş edileceği (varsayılan 1).
+    """
+    print(f"[Tool Execution] place_order_tool çağrıldı: {phone_number} - {product_name} ({quantity} adet)")
+    result = place_order(phone_number, product_name, quantity)
+    return json.dumps(result, ensure_ascii=False)
+
 # Define the Gemini Model
 model = genai.GenerativeModel(
-    model_name="gemini-2.5-flash",
-    tools=[check_order_status, check_inventory, create_support_ticket],
+    model_name="gemini-2.0-flash",
+    tools=[check_order_status, check_inventory, create_support_ticket, place_order_tool],
     system_instruction="""
     Sen Omni-Agent adlı otonom bir müşteri hizmetleri asistanısın. Müşteri mesajlarını alır ve onların niyetini anlarsın.
     Aşağıdaki durumlarda sağlanan araçları (tools) kullanmalısın:
+    - Kullanıcı bir şey satın almak, sipariş vermek veya "x tane y alayım" gibi bir ifade kullanırsa: 'place_order_tool' fonksiyonunu çağır. Ürün adını ve adedini çıkarıp kullan. Adet belirtilmediyse 1 kullan.
     - Kullanıcı siparişinin nerede olduğunu veya durumunu sorarsa: 'check_order_status' fonksiyonunu çağır ve kullanıcının telefon numarasını çıkarıp kullan. Eğer kullanıcı telefon numarasını vermediyse numarayı iste.
     - Kullanıcı bir ürünün stoğunu, fiyatını veya varlığını sorarsa: 'check_inventory' fonksiyonunu çağır.
     - Kullanıcı bir şikayet iletir, destek ister veya bir problem bildirirse: 'create_support_ticket' fonksiyonunu çağır. Şikayet açıklamasını ve telefon numarasını kullan. Telefon numarası yoksa iste.
 
+    Her işlemde müşterinin telefon numarasını bilmen gerekir. Eğer numara bağlamda yoksa nazikçe iste.
     Araçlardan dönen JSON yanıtlarını yorumlayarak müşteriye empatik, yardımsever ve doğal dilde (Türkçe) kısa bir yanıt ver. Mesajların WhatsApp üzerinden iletileceğini unutma, bu yüzden emoji kullanabilirsin.
     Asla JSON formatını doğrudan kullanıcıya gösterme!
     """
