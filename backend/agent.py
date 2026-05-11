@@ -80,14 +80,15 @@ model = genai.GenerativeModel(
 )
 
 # Start a chat session (this allows maintaining conversation history if needed, though for webhook it might be stateless per message initially)
-chat = model.start_chat(enable_automatic_function_calling=True)
-
 def process_customer_message(message: str, customer_phone: str) -> str:
     """
     Müşterinin mesajını alır, LLM'e iletir ve uygun aracı çalıştırarak yanıt döndürür.
     Burada bağlamı korumak için customer_phone'u mesaja dahil ediyoruz ki LLM gerekli olduğunda numarayı bilsin.
     """
     try:
+        # Her mesaj için taze bir chat session başlatıyoruz (Stateless yaklaşım)
+        chat = model.start_chat(enable_automatic_function_calling=True)
+        
         # Prompt'u güçlendirmek için telefon numarasını sisteme bildiriyoruz
         enhanced_message = f"(Müşteri Telefonu: {customer_phone})\nMüşteri Mesajı: {message}"
         
