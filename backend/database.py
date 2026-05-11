@@ -166,3 +166,18 @@ def get_chat_history(customer_phone: str, limit: int = 5) -> str:
     except Exception as e:
         print(f"History fetch error: {e}")
         return "Geçmiş sohbet bulunmuyor."
+
+def add_product(name: str, price: float, stock_quantity: int) -> dict:
+    """Adds a new product to the inventory."""
+    try:
+        response = supabase.table("products").insert({
+            "name": name,
+            "price": float(price),
+            "stock_quantity": int(stock_quantity)
+        }).execute()
+        
+        if response.data:
+            return {"status": "success", "product": response.data[0]}
+        return {"status": "error", "message": "Ürün eklenemedi."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}

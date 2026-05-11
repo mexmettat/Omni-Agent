@@ -10,7 +10,9 @@ import {
   RefreshCw,
   Bell,
   Search,
-  LayoutDashboard
+  LayoutDashboard,
+  Plus,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -24,6 +26,9 @@ function App() {
     openTickets: 0,
     lowStock: 0,
   });
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newProduct, setNewProduct] = useState({ name: '', price: '', stock_quantity: '' });
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -121,6 +126,38 @@ function App() {
       console.error("Update stock error:", error);
       alert("Sunucuya bağlanılamadı.");
     }
+  };
+
+  const handleAddProduct = async (e) => {
+    e.preventDefault();
+    if (!newProduct.name || !newProduct.price || !newProduct.stock_quantity) {
+      alert("Lütfen tüm alanları doldurun.");
+      return;
+    }
+    
+    setIsAdding(true);
+    try {
+      const response = await fetch(`http://localhost:8080/api/admin/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newProduct.name,
+          price: parseFloat(newProduct.price),
+          stock_quantity: parseInt(newProduct.stock_quantity)
+        })
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        setIsAddModalOpen(false);
+        setNewProduct({ name: '', price: '', stock_quantity: '' });
+      } else {
+        alert("Hata: " + result.message);
+      }
+    } catch (error) {
+      console.error("Add product error:", error);
+      alert("Sunucuya bağlanılamadı.");
+    }
+    setIsAdding(false);
   };
 
   const handleResolveTicket = async (id) => {
@@ -231,6 +268,13 @@ function App() {
                   <Package size={24} className="text-indigo-400" />
                   Stok Durumu
                 </h3>
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="flex items-center gap-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 px-4 py-2 rounded-xl text-sm font-bold transition-colors"
+                >
+                  <Plus size={16} />
+                  Yeni Ekle
+                </button>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
@@ -355,6 +399,82 @@ function App() {
 
         </div>
       </main>
+
+      {/* Add Product Modal */}
+      <AnimatePresence>
+        {isAddModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }} 
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setIsAddModalOpen(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-[#0d1117] border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden"
+            >
+              <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <h3 className="font-bold text-xl text-white flex items-center gap-3">
+                  <Package className="text-indigo-400" />
+                  Yeni Ürün Ekle
+                </h3>
+                <button onClick={() => setIsAddModalOpen(false)} className="text-slate-500 hover:text-white transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              <form onSubmit={handleAddProduct} className="p-8 space-y-5">
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ürün Adı</label>
+                  <input 
+                    type="text" 
+                    value={newProduct.name}
+                    onChange={e => setNewProduct({...newProduct, name: e.target.value})}
+                    placeholder="Örn: Domates"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Birim Fiyat (₺)</label>
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      value={newProduct.price}
+                      onChange={e => setNewProduct({...newProduct, price: e.target.value})}
+                      placeholder="0.00"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Stok Miktarı</label>
+                    <input 
+                      type="number" 
+                      value={newProduct.stock_quantity}
+                      onChange={e => setNewProduct({...newProduct, stock_quantity: e.target.value})}
+                      placeholder="0"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+                <button 
+                  type="submit"
+                  disabled={isAdding}
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all active:scale-95 mt-4"
+                >
+                  {isAdding ? 'Ekleniyor...' : 'Ürünü Kaydet'}
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

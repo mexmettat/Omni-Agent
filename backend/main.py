@@ -5,7 +5,7 @@ from fastapi.responses import PlainTextResponse
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.rest import Client
 from agent import process_customer_message
-from database import update_product_stock, update_ticket_status, get_ticket_by_id
+from database import update_product_stock, update_ticket_status, get_ticket_by_id, add_product
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -65,6 +65,17 @@ async def admin_update_stock(product_id: str, data: dict):
     if new_stock is None:
         return {"status": "error", "message": "stock_quantity gerekli."}
     return update_product_stock(product_id, int(new_stock))
+
+@app.post("/api/admin/products")
+async def admin_add_product(data: dict):
+    name = data.get("name")
+    price = data.get("price")
+    stock_quantity = data.get("stock_quantity")
+    
+    if not name or price is None or stock_quantity is None:
+        return {"status": "error", "message": "name, price ve stock_quantity alanları zorunludur."}
+        
+    return add_product(name, float(price), int(stock_quantity))
 
 @app.patch("/api/admin/tickets/{ticket_id}/status")
 async def admin_update_ticket_status(ticket_id: str, data: dict):
