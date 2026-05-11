@@ -120,6 +120,7 @@ Bu proje bir Hackathon/Akademi girişimi konsepti kapsamında tasarlanmıştır.
 ## ✅ Son Güncellemeler & İyileştirmeler
 
 ### 🖥️ Gelişmiş Dashboard (Admin Paneli)
+*   **Güvenli Admin Girişi:** Panel, yabancı erişimine karşı `.env` tabanlı (`VITE_ADMIN_PASSWORD`) şık bir kilit/şifre ekranı ile korunur. Oturumlar tarayıcı `localStorage` üzerinde güvenle tutulur.
 *   **Real-time Veri Akışı:** Supabase Realtime (Postgres Changes) kullanılarak sayfa yenilenmeden anlık stok değişimleri ve yeni siparişler ekrana yansıtılır.
 *   **Pratik Ürün Yönetimi:** Admin panelindeki "Yeni Ekle" butonu sayesinde Supabase'e gitmeye gerek kalmadan şık bir modal (açılır form) üzerinden anında yeni ürün/malzeme eklenebilir. Eklendiği saniye tabloya yansır.
 *   **Premium UI/UX:** `framer-motion` ile akıcı geçişler, `lucide-react` ile modern ikon seti ve koyu tema (dark mode) odaklı cam (glassmorphism) tasarımı.

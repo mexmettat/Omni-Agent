@@ -12,7 +12,9 @@ import {
   Search,
   LayoutDashboard,
   Plus,
-  X
+  X,
+  Lock,
+  LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -29,8 +31,14 @@ function App() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newProduct, setNewProduct] = useState({ name: '', price: '', stock_quantity: '' });
   const [isAdding, setIsAdding] = useState(false);
+  
+  const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('admin_auth') === 'true');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [loginError, setLoginError] = useState(false);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+    
     fetchData();
 
     // Set up Realtime subscriptions
@@ -60,7 +68,7 @@ function App() {
       supabase.removeChannel(ordersSub);
       supabase.removeChannel(ticketsSub);
     };
-  }, []);
+  }, [isAuthenticated]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -181,6 +189,64 @@ function App() {
     }
   };
 
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (passwordInput === import.meta.env.VITE_ADMIN_PASSWORD) {
+      localStorage.setItem('admin_auth', 'true');
+      setIsAuthenticated(true);
+      setLoginError(false);
+    } else {
+      setLoginError(true);
+      setPasswordInput('');
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_auth');
+    setIsAuthenticated(false);
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#0a0c10] flex items-center justify-center p-4 selection:bg-indigo-500/30">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-sm bg-[#0d1117] border border-white/10 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden"
+        >
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center mb-4 border border-indigo-500/20">
+              <Lock className="text-indigo-400 w-8 h-8" />
+            </div>
+            <h2 className="text-2xl font-black text-white tracking-tight">Admin Girişi</h2>
+            <p className="text-slate-400 text-xs mt-1 text-center">Omni-Agent kontrol paneline erişmek için şifrenizi girin.</p>
+          </div>
+          
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <input 
+                type="password" 
+                placeholder="Parola" 
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                className={`w-full bg-white/5 border ${loginError ? 'border-rose-500/50 focus:border-rose-500' : 'border-white/10 focus:border-indigo-500'} rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-center tracking-widest`}
+                required
+              />
+              {loginError && <p className="text-rose-400 text-[10px] font-bold text-center mt-2 animate-pulse">Hatalı şifre, lütfen tekrar deneyin.</p>}
+            </div>
+            <button 
+              type="submit"
+              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              Giriş Yap
+            </button>
+          </form>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0c10] text-slate-200 font-sans selection:bg-indigo-500/30">
 
@@ -201,11 +267,9 @@ function App() {
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             Sistem Çevrimiçi
           </div>
-          <button className="p-2 text-slate-400 hover:text-white transition-colors relative">
-            <Bell size={20} />
-            <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+          <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-rose-400 transition-colors relative" title="Çıkış Yap">
+            <LogOut size={20} />
           </button>
-          <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 border border-white/10 shadow-lg cursor-pointer"></div>
         </div>
       </header>
 
