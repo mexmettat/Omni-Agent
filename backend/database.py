@@ -25,6 +25,16 @@ def get_order_status(customer_phone: str) -> dict:
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+def get_ticket_by_id(ticket_id: str) -> dict:
+    """Gets a specific ticket by its ID."""
+    try:
+        response = supabase.table("tickets").select("*").eq("id", ticket_id).execute()
+        if response.data:
+            return {"status": "success", "ticket": response.data[0]}
+        return {"status": "not_found", "message": "Ticket bulunamadı."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 def get_product_inventory(product_name: str) -> dict:
     """Gets the inventory for a given product name (case-insensitive search)."""
     try:
@@ -33,6 +43,16 @@ def get_product_inventory(product_name: str) -> dict:
         if data:
             return {"status": "success", "products": data}
         return {"status": "not_found", "message": f"{product_name} isimli ürün bulunamadı."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+def update_product_stock(product_id: str, new_stock: int) -> dict:
+    """Updates the stock quantity of a product."""
+    try:
+        response = supabase.table("products").update({"stock_quantity": new_stock}).eq("id", product_id).execute()
+        if response.data:
+            return {"status": "success", "product": response.data[0]}
+        return {"status": "error", "message": "Stok güncellenemedi."}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -49,6 +69,16 @@ def create_ticket(customer_phone: str, issue_description: str) -> dict:
         if data:
             return {"status": "success", "ticket": data[0]}
         return {"status": "error", "message": "Destek talebi oluşturulamadı."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+def update_ticket_status(ticket_id: str, new_status: str) -> dict:
+    """Updates the status of a support ticket."""
+    try:
+        response = supabase.table("tickets").update({"status": new_status}).eq("id", ticket_id).execute()
+        if response.data:
+            return {"status": "success", "ticket": response.data[0]}
+        return {"status": "error", "message": "Bilet durumu güncellenemedi."}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -83,11 +113,15 @@ def place_order(customer_phone: str, product_name: str, quantity: int = 1) -> di
         order_number = f"ORD-{random.randint(1000, 9999)}"
         total_amount = float(price) * quantity
         
+        # Details formatted for cargo_tracking (temporary hack until proper columns added)
+        order_details = f"Ürün: {product_name}, Adet: {quantity}"
+        
         order_response = supabase.table("orders").insert({
             "order_number": order_number,
             "customer_phone": customer_phone,
             "status": "pending",
-            "total_amount": total_amount
+            "total_amount": total_amount,
+            "cargo_tracking": order_details
         }).execute()
         
         if order_response.data:

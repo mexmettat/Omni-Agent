@@ -101,6 +101,49 @@ function App() {
     }
   };
 
+  const handleUpdateStock = async (id, current) => {
+    const newVal = window.prompt("Yeni stok miktarı:", current);
+    if (newVal === null || newVal === "" || isNaN(newVal)) return;
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/admin/products/${id}/stock`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stock_quantity: parseInt(newVal) })
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        setProducts(prev => prev.map(p => p.id === id ? { ...p, stock_quantity: parseInt(newVal) } : p));
+      } else {
+        alert("Hata: " + result.message);
+      }
+    } catch (error) {
+      console.error("Update stock error:", error);
+      alert("Sunucuya bağlanılamadı.");
+    }
+  };
+
+  const handleResolveTicket = async (id) => {
+    if (!window.confirm("Bu talebi çözüldü olarak işaretlemek ve müşteriye bildirim göndermek istediğinize emin misiniz?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/admin/tickets/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'çözüldü' })
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'çözüldü' } : t));
+        alert("Talep çözüldü ve müşteriye WhatsApp bildirimi gönderildi! ✅");
+      } else {
+        alert("Hata: " + result.message);
+      }
+    } catch (error) {
+      console.error("Resolve ticket error:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0c10] text-slate-200 font-sans selection:bg-indigo-500/30">
 
@@ -237,7 +280,16 @@ function App() {
                             )}
                           </td>
                           <td className="px-8 py-5 text-right font-mono text-sm text-slate-400">
-                            {product.price}₺
+                            <div className="flex items-center justify-end gap-3">
+                              <span>{product.price}₺</span>
+                              <button
+                                onClick={() => handleUpdateStock(product.id, product.stock_quantity)}
+                                className="p-1.5 hover:bg-white/10 rounded-lg text-indigo-400 transition-colors"
+                                title="Stok Güncelle"
+                              >
+                                <RefreshCw size={14} />
+                              </button>
+                            </div>
                           </td>
                         </motion.tr>
                       )) : (
@@ -272,7 +324,8 @@ function App() {
                           key={order.id}
                           type="order"
                           title={`Sipariş: ${order.order_number}`}
-                          desc={`${order.customer_phone} sipariş verdi.`}
+                          desc={order.cargo_tracking || `${order.customer_phone} sipariş verdi.`}
+                          phone={order.customer_phone}
                           time={new Date(order.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                         />
                       ))}
@@ -280,8 +333,11 @@ function App() {
                         <LogItem
                           key={ticket.id}
                           type="ticket"
-                          title="Destek Talebi"
+                          title={`Destek Talebi: ${ticket.status}`}
                           desc={ticket.issue_description}
+                          phone={ticket.customer_phone}
+                          status={ticket.status}
+                          onAction={() => handleResolveTicket(ticket.id)}
                           time={new Date(ticket.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                         />
                       ))}
@@ -326,12 +382,12 @@ function StatCard({ title, value, icon, trend, color }) {
   );
 }
 
-function LogItem({ type, title, desc, time }) {
+function LogItem({ type, title, desc, time, phone, status, onAction }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 hover:bg-white/[0.04] transition-colors group"
+      className={`bg-white/[0.02] border border-white/5 rounded-2xl p-5 hover:bg-white/[0.04] transition-colors group ${status === 'çözüldü' ? 'opacity-50' : ''}`}
     >
       <div className="flex gap-4">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${type === 'order' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-rose-500/10 text-rose-400'
@@ -340,12 +396,23 @@ function LogItem({ type, title, desc, time }) {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start gap-2">
-            <h5 className="text-sm font-bold text-white truncate">{title}</h5>
+            <div>
+              <h5 className="text-sm font-bold text-white truncate">{title}</h5>
+              <p className="text-[10px] text-slate-500 font-bold mt-0.5">{phone}</p>
+            </div>
             <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap mt-1">{time}</span>
           </div>
           <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed font-medium">
             {desc}
           </p>
+          {type === 'ticket' && status !== 'çözüldü' && (
+            <button
+              onClick={onAction}
+              className="mt-3 text-[10px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-lg border border-emerald-400/20 hover:bg-emerald-400/20 transition-all"
+            >
+              Çözüldü İşaretle & Bildir
+            </button>
+          )}
         </div>
       </div>
     </motion.div>
