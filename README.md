@@ -8,6 +8,8 @@ Sistem klasik, kural tabanlı chatbotların aksine; müşterinin doğal dildeki 
 
 ## 🚀 Temel Özellikler
 * **Otonom Müşteri Temsilcisi:** Gemini AI, sipariş durumunu veya stok sayısını anlamak için fonksiyon tetiklemeyi (Tool Use) kendisi seçer.
+* **Sohbet Hafızası (Session Memory):** Veritabanı entegrasyonu sayesinde önceki WhatsApp konuşmalarını hatırlar ve bağlam kopukluğunu engeller.
+* **Duygu Analizi ve Aciliyet Skoru:** Şikayetlerdeki duygu durumunu analiz eder ve öfkeli müşteriler için anında "KRİTİK" alarmı üretir.
 * **WhatsApp Entegrasyonu:** Twilio API webhook üzerinden direkt WhatsApp entegrasyonu mevcuttur. Müşterileriniz bir uygulamaya girmeden sizinle konuşur.
 * **Canlı Veritabanı:** Supabase (PostgreSQL) üzerinden stok sorgusu ve sipariş kaydı okuma yeteneği.
 * **Modern Dashboard:** React ve TailwindCSS ile tasarlanmış, mağaza yöneticileri için modern ve hızlı Admin Paneli.
@@ -105,7 +107,8 @@ Projeyi Supabase'de denemek için aşağıdaki gibi SQL şeması oluşturabilirs
 
 * **`products`**: id, name, stock_quantity, price
 * **`orders`**: id, customer_phone, status (Örn: 'kargoda')
-* **`tickets`**: id, customer_phone, issue_description, status
+* **`tickets`**: id, customer_phone, issue_description, status, urgency_level
+* **`chat_history`**: id, customer_phone, role, message_text, created_at
 
 ---
 
@@ -123,5 +126,7 @@ Bu proje bir Hackathon/Akademi girişimi konsepti kapsamında tasarlanmıştır.
 
 ### ⚙️ Akıllı Agent Yetenekleri
 *   **Otonom Sipariş Verme:** `place_order_tool` ile müşteriler artık WhatsApp üzerinden direkt sipariş verebilir. Sistem otomatik olarak stok kontrolü yapar ve bakiyeyi düşer.
+*   **Hafıza (Memory):** Asistan artık önceki sohbetleri hatırlar ve isim, eski talepler gibi bağlamsal süreçleri takip eder.
+*   **Duygu Analizi (Sentiment Analysis):** Müşterinin agresiflik seviyesine göre şikayetleri "Normal", "Yüksek" veya "Kritik" olarak etiketler; kritik şikayetler panele kırmızı yanıp sönerek düşer.
 *   **Hata Yönetimi:** Ürün bulunamadığında veya stok yetersiz olduğunda Gemini, müşteriye nazik ve alternatif sunan yanıtlar verir.
 *   **Gelişmiş Veritabanı Mantığı:** `database.py` içerisinde CRUD işlemleri asenkron ve güvenli hale getirilmiştir.
