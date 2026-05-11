@@ -52,13 +52,15 @@ def create_ticket(customer_phone: str, issue_description: str) -> dict:
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-
 def place_order(customer_phone: str, product_name: str, quantity: int = 1) -> dict:
     """Places an order, decrements stock, and records the order."""
     try:
         # 1. Find the product
         product_response = supabase.table("products").select("*").ilike("name", f"%{product_name}%").execute()
         product_data = product_response.data
+        
+        # Ensure quantity is an integer
+        quantity = int(quantity)
         
         if not product_data:
             return {"status": "not_found", "message": f"{product_name} isimli ürün bulunamadı."}
@@ -73,7 +75,7 @@ def place_order(customer_phone: str, product_name: str, quantity: int = 1) -> di
             return {"status": "insufficient_stock", "message": f"Üzgünüm, stokta sadece {current_stock} adet {product_name} var."}
         
         # 3. Decrement stock
-        new_stock = current_stock - quantity
+        new_stock = int(current_stock - quantity)
         supabase.table("products").update({"stock_quantity": new_stock}).eq("id", product_id).execute()
         
         # 4. Create order
@@ -98,4 +100,3 @@ def place_order(customer_phone: str, product_name: str, quantity: int = 1) -> di
         
     except Exception as e:
         return {"status": "error", "message": str(e)}
-
