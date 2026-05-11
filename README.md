@@ -121,11 +121,13 @@ Bu proje bir Hackathon/Akademi girişimi konsepti kapsamında tasarlanmıştır.
 
 ### 🖥️ Gelişmiş Dashboard (Admin Paneli)
 *   **Real-time Veri Akışı:** Supabase Realtime (Postgres Changes) kullanılarak sayfa yenilenmeden anlık stok değişimleri ve yeni siparişler ekrana yansıtılır.
+*   **Pratik Ürün Yönetimi:** Admin panelindeki "Yeni Ekle" butonu sayesinde Supabase'e gitmeye gerek kalmadan şık bir modal (açılır form) üzerinden anında yeni ürün/malzeme eklenebilir. Eklendiği saniye tabloya yansır.
 *   **Premium UI/UX:** `framer-motion` ile akıcı geçişler, `lucide-react` ile modern ikon seti ve koyu tema (dark mode) odaklı cam (glassmorphism) tasarımı.
 *   **Dinamik İstatistikler:** Toplam sipariş, açık talepler ve kritik stok seviyeleri anlık olarak hesaplanır ve görsel kartlarla sunulur.
 
 ### ⚙️ Akıllı Agent Yetenekleri
 *   **Otonom Sipariş Verme:** `place_order_tool` ile müşteriler artık WhatsApp üzerinden direkt sipariş verebilir. Sistem otomatik olarak stok kontrolü yapar ve bakiyeyi düşer.
+*   **Akıllı Stok Kontrolü:** Müşteri sipariş vermek istediğinde LLM doğrudan siparişi onaylamaz, arka planda ürünün varlığını kontrol eder, eğer varsa müşteriye "Kaç adet istediğini" sorar. Olmayan ürün için sipariş sürecini nazikçe iptal eder.
 *   **Hafıza (Memory):** Asistan artık önceki sohbetleri hatırlar ve isim, eski talepler gibi bağlamsal süreçleri takip eder.
 *   **Duygu Analizi (Sentiment Analysis):** Müşterinin agresiflik seviyesine göre şikayetleri "Normal", "Yüksek" veya "Kritik" olarak etiketler; kritik şikayetler panele kırmızı yanıp sönerek düşer.
 *   **Hata Yönetimi:** Ürün bulunamadığında veya stok yetersiz olduğunda Gemini, müşteriye nazik ve alternatif sunan yanıtlar verir.
