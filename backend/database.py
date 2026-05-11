@@ -56,13 +56,14 @@ def update_product_stock(product_id: str, new_stock: int) -> dict:
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-def create_ticket(customer_phone: str, issue_description: str) -> dict:
-    """Creates a new support ticket."""
+def create_ticket(customer_phone: str, issue_description: str, urgency_level: str = "Normal") -> dict:
+    """Creates a new support ticket with urgency level."""
     try:
         response = supabase.table("tickets").insert({
             "customer_phone": customer_phone,
             "issue_description": issue_description,
-            "status": "açık"
+            "status": "açık",
+            "urgency_level": urgency_level
         }).execute()
         
         data = response.data
@@ -134,3 +135,34 @@ def place_order(customer_phone: str, product_name: str, quantity: int = 1) -> di
         
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+def save_chat_message(customer_phone: str, role: str, message_text: str) -> dict:
+    """Saves a chat message to the history."""
+    try:
+        response = supabase.table("chat_history").insert({
+            "customer_phone": customer_phone,
+            "role": role,
+            "message_text": message_text
+        }).execute()
+        return {"status": "success", "data": response.data}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+def get_chat_history(customer_phone: str, limit: int = 5) -> str:
+    """Retrieves the recent chat history formatted as a string for the LLM."""
+    try:
+        response = supabase.table("chat_history").select("*").eq("customer_phone", customer_phone).order("created_at", desc=True).limit(limit).execute()
+        data = response.data
+        if not data:
+            return "Geçmiş sohbet bulunmuyor."
+            
+        # Reverse the list so the oldest is first
+        data.reverse()
+        history_str = "Aşağıda bu müşteriyle yapılan son konuşmaların geçmişi yer almaktadır:\n"
+        for row in data:
+            role_name = "Müşteri" if row["role"] == "user" else "Asistan (Sen)"
+            history_str += f"- {role_name}: {row['message_text']}\n"
+        return history_str
+    except Exception as e:
+        print(f"History fetch error: {e}")
+        return "Geçmiş sohbet bulunmuyor."

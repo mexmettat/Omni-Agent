@@ -337,6 +337,7 @@ function App() {
                           desc={ticket.issue_description}
                           phone={ticket.customer_phone}
                           status={ticket.status}
+                          urgency_level={ticket.urgency_level}
                           onAction={() => handleResolveTicket(ticket.id)}
                           time={new Date(ticket.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                         />
@@ -382,22 +383,26 @@ function StatCard({ title, value, icon, trend, color }) {
   );
 }
 
-function LogItem({ type, title, desc, time, phone, status, onAction }) {
+function LogItem({ type, title, desc, time, phone, status, urgency_level, onAction }) {
+  const isUrgent = urgency_level === 'Kritik' || urgency_level === 'Yüksek';
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`bg-white/[0.02] border border-white/5 rounded-2xl p-5 hover:bg-white/[0.04] transition-colors group ${status === 'çözüldü' ? 'opacity-50' : ''}`}
+      className={`bg-white/[0.02] border ${isUrgent ? 'border-rose-500/40 bg-rose-500/10 shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'border-white/5'} rounded-2xl p-5 hover:bg-white/[0.04] transition-colors group ${status === 'çözüldü' ? 'opacity-50' : ''}`}
     >
       <div className="flex gap-4">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${type === 'order' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-rose-500/10 text-rose-400'
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${type === 'order' ? 'bg-indigo-500/10 text-indigo-400' : (isUrgent ? 'bg-rose-500 text-white animate-pulse' : 'bg-rose-500/10 text-rose-400')
           }`}>
           {type === 'order' ? <ShoppingCart size={20} /> : <Ticket size={20} />}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-start gap-2">
             <div>
-              <h5 className="text-sm font-bold text-white truncate">{title}</h5>
+              <h5 className="text-sm font-bold text-white truncate flex items-center gap-2">
+                {title}
+                {isUrgent && <span className="text-[9px] bg-rose-500 text-white px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">{urgency_level}</span>}
+              </h5>
               <p className="text-[10px] text-slate-500 font-bold mt-0.5">{phone}</p>
             </div>
             <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap mt-1">{time}</span>
