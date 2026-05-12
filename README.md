@@ -147,17 +147,11 @@ Bu proje aşağıdaki geliştiriciler tarafından büyük bir tutkuyla inşa edi
     <td align="center">
       <a href="https://github.com/mexmettat">
         <img src="https://github.com/mexmettat.png" width="100px;" alt="Mehmet Tatlı"/><br />
-        <sub><b>Mehmet Tatlı</b></sub>
+        <sub><b>Mehmet Tat</b></sub>
       </a>
     </td>
   </tr>
 </table>
-
----
-
-## 📄 Lisans
-
-Bu proje [MIT Lisansı](LICENSE) altında lisanslanmıştır. Daha fazla bilgi için dosyayı inceleyebilirsiniz.
 
 ---
 <p align="center">Omni-Agent ile işletmenizi yapay zekanın gücüyle tanıştırın! 🚀</p>
