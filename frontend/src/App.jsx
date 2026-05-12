@@ -31,14 +31,19 @@ function App() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newProduct, setNewProduct] = useState({ name: '', price: '', stock_quantity: '' });
   const [isAdding, setIsAdding] = useState(false);
-  
+
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [updatingProduct, setUpdatingProduct] = useState(null);
+  const [newStockValue, setNewStockValue] = useState('');
+  const [isUpdatingStock, setIsUpdatingStock] = useState(false);
+
   const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('admin_auth') === 'true');
   const [passwordInput, setPasswordInput] = useState('');
   const [loginError, setLoginError] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    
+
     fetchData();
 
     // Set up Realtime subscriptions
@@ -114,19 +119,28 @@ function App() {
     }
   };
 
-  const handleUpdateStock = async (id, current) => {
-    const newVal = window.prompt("Yeni stok miktarı:", current);
-    if (newVal === null || newVal === "" || isNaN(newVal)) return;
+  const handleUpdateStock = (product) => {
+    setUpdatingProduct(product);
+    setNewStockValue(product.stock_quantity.toString());
+    setIsUpdateModalOpen(true);
+  };
 
+  const handleUpdateStockSubmit = async (e) => {
+    e.preventDefault();
+    if (!updatingProduct || newStockValue === "" || isNaN(newStockValue)) return;
+
+    setIsUpdatingStock(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/admin/products/${id}/stock`, {
+      const response = await fetch(`http://localhost:8080/api/admin/products/${updatingProduct.id}/stock`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stock_quantity: parseInt(newVal) })
+        body: JSON.stringify({ stock_quantity: parseInt(newStockValue) })
       });
       const result = await response.json();
       if (result.status === 'success') {
-        setProducts(prev => prev.map(p => p.id === id ? { ...p, stock_quantity: parseInt(newVal) } : p));
+        setProducts(prev => prev.map(p => p.id === updatingProduct.id ? { ...p, stock_quantity: parseInt(newStockValue) } : p));
+        setIsUpdateModalOpen(false);
+        setUpdatingProduct(null);
       } else {
         alert("Hata: " + result.message);
       }
@@ -134,6 +148,7 @@ function App() {
       console.error("Update stock error:", error);
       alert("Sunucuya bağlanılamadı.");
     }
+    setIsUpdatingStock(false);
   };
 
   const handleAddProduct = async (e) => {
@@ -142,7 +157,7 @@ function App() {
       alert("Lütfen tüm alanları doldurun.");
       return;
     }
-    
+
     setIsAdding(true);
     try {
       const response = await fetch(`http://localhost:8080/api/admin/products`, {
@@ -209,7 +224,7 @@ function App() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#0a0c10] flex items-center justify-center p-4 selection:bg-indigo-500/30">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-sm bg-[#0d1117] border border-white/10 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden"
@@ -222,12 +237,12 @@ function App() {
             <h2 className="text-2xl font-black text-white tracking-tight">Admin Girişi</h2>
             <p className="text-slate-400 text-xs mt-1 text-center">Omni-Agent kontrol paneline erişmek için şifrenizi girin.</p>
           </div>
-          
+
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <input 
-                type="password" 
-                placeholder="Parola" 
+              <input
+                type="password"
+                placeholder="Parola"
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
                 className={`w-full bg-white/5 border ${loginError ? 'border-rose-500/50 focus:border-rose-500' : 'border-white/10 focus:border-indigo-500'} rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all text-center tracking-widest`}
@@ -235,7 +250,7 @@ function App() {
               />
               {loginError && <p className="text-rose-400 text-[10px] font-bold text-center mt-2 animate-pulse">Hatalı şifre, lütfen tekrar deneyin.</p>}
             </div>
-            <button 
+            <button
               type="submit"
               className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all active:scale-95 flex items-center justify-center gap-2"
             >
@@ -371,7 +386,7 @@ function App() {
                                   initial={{ width: 0 }}
                                   animate={{ width: `${Math.min(product.stock_quantity, 100)}%` }}
                                   className={`h-full rounded-full ${product.stock_quantity < 10 ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]' :
-                                      product.stock_quantity < 30 ? 'bg-amber-500' : 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]'
+                                    product.stock_quantity < 30 ? 'bg-amber-500' : 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]'
                                     }`}
                                 ></motion.div>
                               </div>
@@ -391,7 +406,7 @@ function App() {
                             <div className="flex items-center justify-end gap-3">
                               <span>{product.price}₺</span>
                               <button
-                                onClick={() => handleUpdateStock(product.id, product.stock_quantity)}
+                                onClick={() => handleUpdateStock(product)}
                                 className="p-1.5 hover:bg-white/10 rounded-lg text-indigo-400 transition-colors"
                                 title="Stok Güncelle"
                               >
@@ -468,16 +483,16 @@ function App() {
       <AnimatePresence>
         {isAddModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               className="absolute inset-0 bg-black/60 backdrop-blur-sm"
               onClick={() => setIsAddModalOpen(false)}
             />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
-              animate={{ opacity: 1, scale: 1, y: 0 }} 
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="relative w-full max-w-md bg-[#0d1117] border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden"
             >
@@ -493,10 +508,10 @@ function App() {
               <form onSubmit={handleAddProduct} className="p-8 space-y-5">
                 <div>
                   <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ürün Adı</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={newProduct.name}
-                    onChange={e => setNewProduct({...newProduct, name: e.target.value})}
+                    onChange={e => setNewProduct({ ...newProduct, name: e.target.value })}
                     placeholder="Örn: Domates"
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                     required
@@ -505,11 +520,11 @@ function App() {
                 <div className="grid grid-cols-2 gap-5">
                   <div>
                     <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Birim Fiyat (₺)</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       step="0.01"
                       value={newProduct.price}
-                      onChange={e => setNewProduct({...newProduct, price: e.target.value})}
+                      onChange={e => setNewProduct({ ...newProduct, price: e.target.value })}
                       placeholder="0.00"
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                       required
@@ -517,23 +532,87 @@ function App() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Stok Miktarı</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={newProduct.stock_quantity}
-                      onChange={e => setNewProduct({...newProduct, stock_quantity: e.target.value})}
+                      onChange={e => setNewProduct({ ...newProduct, stock_quantity: e.target.value })}
                       placeholder="0"
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                       required
                     />
                   </div>
                 </div>
-                <button 
+                <button
                   type="submit"
                   disabled={isAdding}
                   className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all active:scale-95 mt-4"
                 >
                   {isAdding ? 'Ekleniyor...' : 'Ürünü Kaydet'}
                 </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Update Stock Modal */}
+      <AnimatePresence>
+        {isUpdateModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setIsUpdateModalOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-[#0d1117] border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden"
+            >
+              <div className="px-8 py-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <h3 className="font-bold text-xl text-white flex items-center gap-3">
+                  <RefreshCw className="text-indigo-400" />
+                  Stok Güncelle
+                </h3>
+                <button onClick={() => setIsUpdateModalOpen(false)} className="text-slate-500 hover:text-white transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              <form onSubmit={handleUpdateStockSubmit} className="p-8 space-y-5">
+                <div>
+                  <p className="text-sm text-slate-400 mb-4">
+                    <span className="font-bold text-white">{updatingProduct?.name}</span> ürünü için stok miktarını güncelleyin.
+                  </p>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Yeni Stok Miktarı</label>
+                  <input
+                    type="number"
+                    value={newStockValue}
+                    onChange={e => setNewStockValue(e.target.value)}
+                    placeholder="0"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                    required
+                    autoFocus
+                  />
+                </div>
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setIsUpdateModalOpen(false)}
+                    className="flex-1 bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded-xl transition-all active:scale-95"
+                  >
+                    Vazgeç
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isUpdatingStock}
+                    className="flex-[2] bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
+                  >
+                    {isUpdatingStock ? 'Güncelleniyor...' : 'Stoku Güncelle'}
+                  </button>
+                </div>
               </form>
             </motion.div>
           </div>
