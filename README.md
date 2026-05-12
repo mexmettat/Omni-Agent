@@ -1,135 +1,163 @@
 # Omni-Agent 🤖📦
 
-Omni-Agent, WhatsApp üzerinden gelen müşteri taleplerini insan müdahalesi olmadan, **%100 otonom** bir şekilde yönetmesini sağlayan yapay zeka (LLM) destekli bir müşteri ve sipariş yönetim sistemidir. 
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.io/)
+[![Google Gemini](https://img.shields.io/badge/Google_Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
 
-Sistem klasik, kural tabanlı chatbotların aksine; müşterinin doğal dildeki niyetini anlayan, arka plandaki veritabanından veri çekme kararını kendisi veren ve işlem sonuçlarını yine doğal ve empatik bir metne dönüştüren **"Agentic (Otonom Araç Kullanımı - Function Calling)"** bir mimariye dayanır.
+Omni-Agent, işletmeler için WhatsApp üzerinden gelen müşteri taleplerini **%100 otonom** bir şekilde yöneten, yapay zeka (LLM) destekli bir müşteri ve sipariş yönetim ekosistemidir. 
 
----
-
-## 🚀 Temel Özellikler
-* **Otonom Müşteri Temsilcisi:** Gemini AI, sipariş durumunu veya stok sayısını anlamak için fonksiyon tetiklemeyi (Tool Use) kendisi seçer.
-* **Sohbet Hafızası (Session Memory):** Veritabanı entegrasyonu sayesinde önceki WhatsApp konuşmalarını hatırlar ve bağlam kopukluğunu engeller.
-* **Duygu Analizi ve Aciliyet Skoru:** Şikayetlerdeki duygu durumunu analiz eder ve öfkeli müşteriler için anında "KRİTİK" alarmı üretir.
-* **WhatsApp Entegrasyonu:** Twilio API webhook üzerinden direkt WhatsApp entegrasyonu mevcuttur. Müşterileriniz bir uygulamaya girmeden sizinle konuşur.
-* **Canlı Veritabanı:** Supabase (PostgreSQL) üzerinden stok sorgusu ve sipariş kaydı okuma yeteneği.
-* **Modern Dashboard:** React ve TailwindCSS ile tasarlanmış, mağaza yöneticileri için modern ve hızlı Admin Paneli.
+Geleneksel, kural tabanlı chatbotların aksine Omni-Agent; müşterinin doğal dildeki niyetini anlayan, arka plandaki veritabanıyla etkileşime giren (Function Calling) ve empati kurabilen bir dijital asistandır.
 
 ---
 
-## 🛠 Kullanılan Teknolojiler (Tech Stack)
+## 🌟 Öne Çıkan Özellikler
 
-### Backend
-* **Python (FastAPI):** Yüksek performanslı ve asenkron webhook altyapısı.
-* **Google Gemini API:** `gemini-2.5-flash` modeli ile anlamsal analiz ve Function Calling yeteneği.
-* **Twilio:** WhatsApp mesajlarını almak ve göndermek için HTTP köprüsü.
-* **Supabase Client:** Veritabanına asenkron bağlantı aracı.
-
-### Frontend
-* **React + Vite:** Ultra hızlı derleme ve modüler modern UI.
-* **TailwindCSS (v4):** Özel tasarlanmış stil ve komponent yönetimi.
+- **🤖 Otonom Ajan Mimarisi:** Gemini 1.5 Flash modeli ile müşterinin niyetini analiz eder ve otomatik olarak doğru araçları (stok kontrolü, sipariş verme, bilet oluşturma) tetikler.
+- **💬 Akıllı WhatsApp Entegrasyonu:** Twilio API üzerinden müşterilerle doğrudan WhatsApp üzerinden iletişim kurar.
+- **🧠 Bağlamsal Hafıza (Session Memory):** Supabase entegrasyonu ile geçmiş konuşmaları hatırlar ve müşteriye ismiyle hitap ederek kaldığı yerden devam eder.
+- **📊 Gelişmiş Admin Dashboard:** Siparişleri, stok durumunu ve müşteri taleplerini real-time (anlık) olarak takip edebileceğiniz modern bir panel.
+- **🎭 Duygu Analizi (Sentiment Analysis):** Müşteri mesajlarındaki öfke veya aciliyet durumunu tespit eder ve "Kritik" etiketli talepler için yöneticileri uyarır.
+- **🔐 Güvenli Erişim:** Admin paneli için şifre korumalı giriş ve güvenli session yönetimi.
 
 ---
 
-## 📂 Proje Mimarisi (Pipeline)
+## 🛠️ Teknoloji Yığını
 
-1. **Müşteri** bir WhatsApp mesajı yollar.
-2. **Twilio**, bu mesajı yakalayıp ngrok aracılığıyla **FastAPI** webhook'una `POST` eder.
-3. FastAPI, gelen bağlamı ve telefon numarasını **Gemini AI** modeline besler.
-4. Gemini, mesajın niyetine göre uygun Aracı (Tool) tetikler: `check_order_status`, `check_inventory` veya `create_support_ticket`.
-5. Arka planda **Supabase**'e bağlanılır ve istenen veri (Örn: "Domates, 120 adet") çekilir.
-6. Gemini, dönen soğuk veriyi okuyup insan dilinde, sıcak bir Türkçe mesaja çevirir.
-7. Yanıt **Twilio** üzerinden müşteriye WhatsApp'tan ulaştırılır.
+### Backend (Beyin)
+- **FastAPI:** Yüksek performanslı, asenkron Python framework.
+- **Google Gemini API:** `gemini-1.5-flash` ile anlamsal analiz ve Function Calling.
+- **Twilio:** WhatsApp mesajlaşma köprüsü.
+- **Supabase (PostgreSQL):** Bulut veritabanı ve Real-time veri akışı.
+
+### Frontend (Yönetim Paneli)
+- **React + Vite:** Hızlı ve modüler kullanıcı arayüzü.
+- **Tailwind CSS v4:** Modern ve esnek stil yönetimi.
+- **Framer Motion:** Akıcı UI animasyonları ve geçişler.
+- **Lucide React:** Minimalist ve açıklayıcı ikon seti.
 
 ---
 
-## ⚙️ Kurulum ve Çalıştırma Rehberi
+## 📐 Sistem Mimarisi
 
-Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları sırasıyla uygulayın.
-
-### 1. Gereksinimler
-* Python 3.9+
-* Node.js (v18+)
-* [Ngrok](https://ngrok.com/) hesabı
-* Supabase, Google Gemini ve Twilio API Anahtarları
-
-### 2. Depoyu İndirme (Clone)
-```bash
-git clone https://github.com/KULLANICI_ADINIZ/omni-agent.git
-cd omni-agent
+```mermaid
+graph TD
+    A[Müşteri / WhatsApp] -->|Mesaj| B(Twilio Webhook)
+    B -->|POST Request| C[FastAPI Backend]
+    C -->|Bağlam & Mesaj| D[Google Gemini AI]
+    D -->|Function Calling| E{Araç Seçimi}
+    E -->|check_inventory| F[(Supabase DB)]
+    E -->|place_order| F
+    E -->|create_ticket| F
+    F -->|Veri| E
+    E -->|İşlem Sonucu| D
+    D -->|Doğal Dil Yanıtı| C
+    C -->|Response| B
+    B -->|WhatsApp Mesajı| A
 ```
 
-### 3. Backend (API) Kurulumu
-Backend klasörüne gidin ve gerekli Python kütüphanelerini kurun:
+---
+
+## 🚀 Hızlı Başlangıç (Kurulum)
+
+Projeyi yerel ortamınızda ayağa kaldırmak için aşağıdaki adımları izleyin.
+
+### 📋 Gereksinimler
+- **Python 3.9+**
+- **Node.js 18+**
+- **Ngrok** (Webhook'ları yerel sunucuya yönlendirmek için)
+- API Anahtarları: [Gemini API](https://aistudio.google.com/), [Twilio](https://www.twilio.com/), [Supabase](https://supabase.com/)
+
+### 1. Depoyu Klonlayın
+```bash
+git clone https://github.com/tahaaoztrkk/Omni-Agent.git
+cd Omni-Agent
+```
+
+### 2. Backend Kurulumu
 ```bash
 cd backend
+python -m venv venv
+source venv/bin/activate  # Windows için: venv\Scripts\activate
 pip install -r requirements.txt
 ```
-Ardından `backend/.env.example` dosyasının adını `.env` olarak değiştirin ve kendi bilgilerinizi doldurun:
+`backend/.env.example` dosyasını `.env` olarak kopyalayın ve bilgilerinizi girin:
 ```env
-SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
-SUPABASE_KEY=YOUR_SUPABASE_ANON_KEY
-GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_anon_key
+GEMINI_API_KEY=your_gemini_api_key
 ```
 Sunucuyu başlatın:
 ```bash
 python -m uvicorn main:app --reload --port 8080
 ```
 
-### 4. Frontend (Dashboard) Kurulumu
-Yeni bir terminal açıp frontend klasörüne girin ve kütüphaneleri kurun:
+### 3. Frontend Kurulumu
 ```bash
-cd frontend
+cd ../frontend
 npm install
 ```
-Ardından `frontend/.env.example` dosyasının adını `.env` olarak değiştirin ve Supabase bilgilerinizi girin:
+`frontend/.env.example` dosyasını `.env` olarak kopyalayın:
 ```env
-VITE_SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
-VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_ADMIN_PASSWORD=your_secure_password
 ```
 Dashboard'u başlatın:
 ```bash
 npm run dev
 ```
-Dashboard `http://localhost:5173` adresinde çalışacaktır.
 
-### 5. Twilio (WhatsApp) Bağlantısı
-Yerel sunucunuzu internete açmak için farklı bir terminalde ngrok başlatın:
+### 4. WhatsApp Webhook Bağlantısı (Ngrok)
+Twilio'nun yerel backend'inize erişebilmesi için ngrok kullanın:
 ```bash
 ngrok http 8080
 ```
-Twilio Console > Messaging > Send a WhatsApp message > Sandbox Settings sekmesine gidip **WHEN A MESSAGE COMES IN** bölümüne Ngrok adresinizi ekleyin:
-`https://<SİZİN-NGROK-ADRESİNİZ>/api/webhook/whatsapp`
+Ngrok'un sağladığı URL'yi Twilio Console'da **Messaging > Sandbox Settings** altındaki "When a message comes in" kısmına yapıştırın:
+`https://your-ngrok-url.ngrok-free.app/api/webhook/whatsapp`
 
 ---
 
-## 📊 Veritabanı Tabloları (Supabase)
-Projeyi Supabase'de denemek için aşağıdaki gibi SQL şeması oluşturabilirsiniz:
+## 🗄️ Veritabanı Şeması (Supabase)
 
-* **`products`**: id, name, stock_quantity, price
-* **`orders`**: id, customer_phone, status (Örn: 'kargoda')
-* **`tickets`**: id, customer_phone, issue_description, status, urgency_level
-* **`chat_history`**: id, customer_phone, role, message_text, created_at
+Projenin tam performanslı çalışması için Supabase üzerinde aşağıdaki tabloları oluşturun:
 
----
-
-## 👨‍💻 Geliştirici Bilgileri
-Bu proje bir Hackathon/Akademi girişimi konsepti kapsamında tasarlanmıştır. Tamamen asenkron yapıda çalışmakta ve kolaylıkla yatayda (scale) büyütülebilmektedir. Katkı sağlamak isterseniz (PR/Issue) her zaman bekleriz!
+| Tablo | Açıklama |
+| :--- | :--- |
+| `products` | Ürün listesi, stok miktarları ve fiyatlar. |
+| `orders` | Müşteri siparişleri ve teslimat durumları. |
+| `tickets` | Destek talepleri ve aciliyet seviyeleri. |
+| `chat_history` | AI ve müşteri arasındaki konuşma geçmişi (Memory). |
 
 ---
 
-## ✅ Son Güncellemeler & İyileştirmeler
+## 👥 Geliştiriciler
 
-### 🖥️ Gelişmiş Dashboard (Admin Paneli)
-*   **Güvenli Admin Girişi:** Panel, yabancı erişimine karşı `.env` tabanlı (`VITE_ADMIN_PASSWORD`) şık bir kilit/şifre ekranı ile korunur. Oturumlar tarayıcı `localStorage` üzerinde güvenle tutulur.
-*   **Real-time Veri Akışı:** Supabase Realtime (Postgres Changes) kullanılarak sayfa yenilenmeden anlık stok değişimleri ve yeni siparişler ekrana yansıtılır.
-*   **Pratik Ürün Yönetimi:** Admin panelindeki "Yeni Ekle" butonu sayesinde Supabase'e gitmeye gerek kalmadan şık bir modal (açılır form) üzerinden anında yeni ürün/malzeme eklenebilir. Eklendiği saniye tabloya yansır.
-*   **Premium UI/UX:** `framer-motion` ile akıcı geçişler, `lucide-react` ile modern ikon seti ve koyu tema (dark mode) odaklı cam (glassmorphism) tasarımı.
-*   **Dinamik İstatistikler:** Toplam sipariş, açık talepler ve kritik stok seviyeleri anlık olarak hesaplanır ve görsel kartlarla sunulur.
+Bu proje aşağıdaki geliştiriciler tarafından büyük bir tutkuyla inşa edilmiştir:
 
-### ⚙️ Akıllı Agent Yetenekleri
-*   **Otonom Sipariş Verme:** `place_order_tool` ile müşteriler artık WhatsApp üzerinden direkt sipariş verebilir. Sistem otomatik olarak stok kontrolü yapar ve bakiyeyi düşer.
-*   **Akıllı Stok Kontrolü:** Müşteri sipariş vermek istediğinde LLM doğrudan siparişi onaylamaz, arka planda ürünün varlığını kontrol eder, eğer varsa müşteriye "Kaç adet istediğini" sorar. Olmayan ürün için sipariş sürecini nazikçe iptal eder.
-*   **Hafıza (Memory):** Asistan artık önceki sohbetleri hatırlar ve isim, eski talepler gibi bağlamsal süreçleri takip eder.
-*   **Duygu Analizi (Sentiment Analysis):** Müşterinin agresiflik seviyesine göre şikayetleri "Normal", "Yüksek" veya "Kritik" olarak etiketler; kritik şikayetler panele kırmızı yanıp sönerek düşer.
-*   **Hata Yönetimi:** Ürün bulunamadığında veya stok yetersiz olduğunda Gemini, müşteriye nazik ve alternatif sunan yanıtlar verir.
-*   **Gelişmiş Veritabanı Mantığı:** `database.py` içerisinde CRUD işlemleri asenkron ve güvenli hale getirilmiştir.
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/tahaaoztrkk">
+        <img src="https://github.com/tahaaoztrkk.png" width="100px;" alt="Taha Öztürk"/><br />
+        <sub><b>Taha Öztürk</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/mexmettat">
+        <img src="https://github.com/mexmettat.png" width="100px;" alt="Mehmet Tatlı"/><br />
+        <sub><b>Mehmet Tatlı</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 📄 Lisans
+
+Bu proje [MIT Lisansı](LICENSE) altında lisanslanmıştır. Daha fazla bilgi için dosyayı inceleyebilirsiniz.
+
+---
+<p align="center">Omni-Agent ile işletmenizi yapay zekanın gücüyle tanıştırın! 🚀</p>
