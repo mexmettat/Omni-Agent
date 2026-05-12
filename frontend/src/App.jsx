@@ -204,6 +204,27 @@ function App() {
     }
   };
 
+  const handleUpdateOrderStatus = async (id, newStatus) => {
+    if (!window.confirm(`Sipariş durumunu "${newStatus.toUpperCase()}" olarak güncellemek istiyor musunuz?`)) return;
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/admin/orders/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
+        alert(`Sipariş durumu güncellendi ve müşteriye bildirim gönderildi! 📦`);
+      } else {
+        alert("Hata: " + result.message);
+      }
+    } catch (error) {
+      console.error("Update order status error:", error);
+    }
+  };
+
   const handleLogin = (e) => {
     e.preventDefault();
     if (passwordInput === import.meta.env.VITE_ADMIN_PASSWORD) {
@@ -449,6 +470,8 @@ function App() {
                           title={`Sipariş: ${order.order_number}`}
                           desc={order.cargo_tracking || `${order.customer_phone} sipariş verdi.`}
                           phone={order.customer_phone}
+                          status={order.status}
+                          onAction={(newStatus) => handleUpdateOrderStatus(order.id, newStatus)}
                           time={new Date(order.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
                         />
                       ))}
@@ -652,7 +675,7 @@ function LogItem({ type, title, desc, time, phone, status, urgency_level, onActi
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`bg-white/[0.02] border ${isUrgent ? 'border-rose-500/40 bg-rose-500/10 shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'border-white/5'} rounded-2xl p-5 hover:bg-white/[0.04] transition-colors group ${status === 'çözüldü' ? 'opacity-50' : ''}`}
+      className={`bg-white/[0.02] border ${isUrgent ? 'border-rose-500/40 bg-rose-500/10 shadow-[0_0_15px_rgba(244,63,94,0.2)]' : 'border-white/5'} rounded-2xl p-5 hover:bg-white/[0.04] transition-colors group ${status === 'çözüldü' || status === 'teslim edildi' ? 'opacity-50' : ''}`}
     >
       <div className="flex gap-4">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${type === 'order' ? 'bg-indigo-500/10 text-indigo-400' : (isUrgent ? 'bg-rose-500 text-white animate-pulse' : 'bg-rose-500/10 text-rose-400')
@@ -665,6 +688,14 @@ function LogItem({ type, title, desc, time, phone, status, urgency_level, onActi
               <h5 className="text-sm font-bold text-white truncate flex items-center gap-2">
                 {title}
                 {isUrgent && <span className="text-[9px] bg-rose-500 text-white px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">{urgency_level}</span>}
+                {type === 'order' && status && (
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider ${(status === 'hazırlanıyor' || status === 'pending') ? 'bg-amber-500/20 text-amber-500' :
+                      status === 'kargoda' ? 'bg-blue-500/20 text-blue-500' :
+                        'bg-emerald-500/20 text-emerald-500'
+                    }`}>
+                    {status}
+                  </span>
+                )}
               </h5>
               <p className="text-[10px] text-slate-500 font-bold mt-0.5">{phone}</p>
             </div>
@@ -680,6 +711,27 @@ function LogItem({ type, title, desc, time, phone, status, urgency_level, onActi
             >
               Çözüldü İşaretle & Bildir
             </button>
+          )}
+
+          {type === 'order' && status !== 'teslim edildi' && (
+            <div className="flex gap-2 mt-3">
+              {(status === 'hazırlanıyor' || status === 'pending') && (
+                <button
+                  onClick={() => onAction('kargoda')}
+                  className="text-[10px] font-black uppercase tracking-wider text-blue-400 bg-blue-400/10 px-3 py-1.5 rounded-lg border border-blue-400/20 hover:bg-blue-400/20 transition-all"
+                >
+                  Kargoya Ver
+                </button>
+              )}
+              {(status === 'hazırlanıyor' || status === 'kargoda' || status === 'pending') && (
+                <button
+                  onClick={() => onAction('teslim edildi')}
+                  className="text-[10px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-lg border border-emerald-400/20 hover:bg-emerald-400/20 transition-all"
+                >
+                  Teslim Edildi
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>

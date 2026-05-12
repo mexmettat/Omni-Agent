@@ -120,7 +120,7 @@ def place_order(customer_phone: str, product_name: str, quantity: int = 1) -> di
         order_response = supabase.table("orders").insert({
             "order_number": order_number,
             "customer_phone": customer_phone,
-            "status": "pending",
+            "status": "hazırlanıyor",
             "total_amount": total_amount,
             "cargo_tracking": order_details
         }).execute()
@@ -179,5 +179,25 @@ def add_product(name: str, price: float, stock_quantity: int) -> dict:
         if response.data:
             return {"status": "success", "product": response.data[0]}
         return {"status": "error", "message": "Ürün eklenemedi."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+def update_order_status(order_id: str, new_status: str) -> dict:
+    """Updates the status of an order."""
+    try:
+        response = supabase.table("orders").update({"status": new_status}).eq("id", order_id).execute()
+        if response.data:
+            return {"status": "success", "order": response.data[0]}
+        return {"status": "error", "message": "Sipariş durumu güncellenemedi."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+def get_order_by_id(order_id: str) -> dict:
+    """Gets a specific order by its ID."""
+    try:
+        response = supabase.table("orders").select("*").eq("id", order_id).execute()
+        if response.data:
+            return {"status": "success", "order": response.data[0]}
+        return {"status": "not_found", "message": "Sipariş bulunamadı."}
     except Exception as e:
         return {"status": "error", "message": str(e)}

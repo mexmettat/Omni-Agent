@@ -5,7 +5,7 @@ from fastapi.responses import PlainTextResponse
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.rest import Client
 from agent import process_customer_message
-from database import update_product_stock, update_ticket_status, get_ticket_by_id, add_product
+from database import update_product_stock, update_ticket_status, get_ticket_by_id, add_product, update_order_status, get_order_by_id
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -104,6 +104,40 @@ async def admin_update_ticket_status(ticket_id: str, data: dict):
                     print(f"[Admin] Bildirim gönderme hatası: {e}")
             else:
                 print("[Admin] Twilio client yapılandırılmamış, bildirim gönderilemedi.")
+                
+    return result
+
+@app.patch("/api/admin/orders/{order_id}/status")
+async def admin_update_order_status(order_id: str, data: dict):
+    new_status = data.get("status")
+    if not new_status:
+        return {"status": "error", "message": "status gerekli."}
+    
+    # 1. Update DB
+    result = update_order_status(order_id, new_status)
+    
+    # 2. Send WhatsApp notification
+    if result["status"] == "success":
+        order_data = get_order_by_id(order_id)
+        if order_data["status"] == "success":
+            phone = order_data["order"]["customer_phone"]
+            order_number = order_data["order"]["order_number"]
+            if twilio_client:
+                try:
+                    message_text = f"Merhaba! {order_number} numaralı siparişinizin durumu güncellendi: *{new_status.upper()}* 📦"
+                    if new_status == "kargoda":
+                        message_text += "\nEn kısa sürede elinizde olacaktır."
+                    elif new_status == "teslim edildi":
+                        message_text = f"Harika haber! {order_number} numaralı siparişiniz teslim edildi. Bizi tercih ettiğiniz için teşekkürler! ✅"
+                    
+                    twilio_client.messages.create(
+                        from_='whatsapp:+14155238886',
+                        body=message_text,
+                        to=f'whatsapp:{phone}'
+                    )
+                    print(f"[Admin] Sipariş bildirimi gönderildi: {phone}")
+                except Exception as e:
+                    print(f"[Admin] Sipariş bildirim hatası: {e}")
                 
     return result
 
