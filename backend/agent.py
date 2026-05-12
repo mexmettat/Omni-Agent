@@ -4,7 +4,7 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 from database import get_order_status, get_product_inventory, create_ticket, place_order, save_chat_message, get_chat_history
 
-load_dotenv()
+load_dotenv(override=True)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
@@ -25,9 +25,9 @@ def check_order_status(phone_number: str) -> str:
     result = get_order_status(phone_number)
     return json.dumps(result, ensure_ascii=False)
 
-def check_inventory(product_name: str) -> str:
+def check_inventory(product_name: str = "") -> str:
     """
-    Verilen ürün ismine göre stok bilgisini kontrol eder.
+    Verilen ürün ismine göre stok bilgisini kontrol eder. Eğer ürün ismi boş bırakılırsa tüm ürünleri listeler.
     
     Args:
         product_name: Stok durumu kontrol edilecek ürünün adı.
@@ -69,6 +69,7 @@ model = genai.GenerativeModel(
     system_instruction="""
     Sen Omni-Agent adlı otonom bir müşteri hizmetleri asistanısın. Müşteri mesajlarını alır ve onların niyetini anlarsın.
     Aşağıdaki durumlarda sağlanan araçları (tools) kullanmalısın:
+    - Kullanıcı genel olarak "Hangi ürünleriniz var?", "Neler satıyorsunuz?" diye sorarsa: 'check_inventory' aracını product_name argümanını boş ("") bırakarak çağır ve gelen listeyi müşteriye sun.
     - Kullanıcı bir ürün satın almak, sipariş vermek veya fiyat/stok sormak isterse: ÖNCE KESİNLİKLE 'check_inventory' aracını kullanarak ürünün stokta olup olmadığını kontrol et. 
     - EĞER 'check_inventory' sonucunda ürün yoksa: Müşteriye nazikçe bu ürünün elimizde olmadığını söyle ve satışı durdur.
     - EĞER ürün stokta varsa ve müşteri satın almak istiyorsa: ÖNCE kullanıcının kaç ADET istediğini kontrol et. Eğer miktar belirtilmemişse, 'place_order_tool' fonksiyonunu ÇAĞIRMA ve müşteriye "Kaç adet almak istersiniz?" diye sor. Sadece adet belirtildiğinde 'place_order_tool' fonksiyonunu çağır.

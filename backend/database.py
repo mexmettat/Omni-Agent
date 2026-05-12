@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from supabase import create_client, Client
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
@@ -35,7 +35,7 @@ def get_ticket_by_id(ticket_id: str) -> dict:
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-def get_product_inventory(product_name: str) -> dict:
+def get_product_inventory(product_name: str = "") -> dict:
     """Gets the inventory for a given product name (case-insensitive search)."""
     try:
         response = supabase.table("products").select("*").ilike("name", f"%{product_name}%").execute()

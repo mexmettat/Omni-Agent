@@ -8,7 +8,7 @@ from agent import process_customer_message
 from database import update_product_stock, update_ticket_status, get_ticket_by_id, add_product
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 app = FastAPI(title="Omni-Agent API")
 
