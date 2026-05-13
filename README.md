@@ -12,13 +12,41 @@ Geleneksel, kural tabanlı chatbotların aksine Omni-Agent; müşterinin doğal 
 
 ---
 
+## 📸 Proje Görünümü
+
+### 🖥️ Yönetim Paneli (Admin Dashboard)
+Modern, karanlık mod (Dark Mode) destekli ve anlık veri akışına sahip yönetim paneli ile tüm operasyonunuzu tek bir yerden yönetin.
+
+<p align="center">
+  <img src="documents/yönetimpaneli_1.png" width="45%" alt="Dashboard Overview" />
+  <img src="documents/yönetimpaneli_2.png" width="45%" alt="Dashboard Inventory" />
+</p>
+
+### 💬 Müşteri Deneyimi (WhatsApp)
+Müşterilerinizle sanki bir insanla konuşuyormuşçasına doğal ve çözüm odaklı iletişim.
+
+<p align="center">
+  <img src="documents/müşteri_1.jpg" width="45%" alt="WhatsApp Conversation 1" />
+  <img src="documents/müşteri_2.jpg" width="45%" alt="WhatsApp Conversation 2" />
+</p>
+
+---
+
+## 📄 Proje Sunumu
+Projenin detaylı sunumuna ve vizyonuna aşağıdaki bağlantıdan ulaşabilirsiniz:
+
+👉 [**Omni-Agent Proje Sunumu (PDF)**](documents/HACKATHON%20GRUP%20234%20-%20OMNİAGENT.pdf)
+
+---
+
 ## 🌟 Öne Çıkan Özellikler
 
 - **🤖 Otonom Ajan Mimarisi:** Gemini 1.5 Flash modeli ile müşterinin niyetini analiz eder ve otomatik olarak doğru araçları (stok kontrolü, sipariş verme, bilet oluşturma) tetikler.
-- **💬 Akıllı WhatsApp Entegrasyonu:** Twilio API üzerinden müşterilerle doğrudan WhatsApp üzerinden iletişim kurar.
-- **🧠 Bağlamsal Hafıza (Session Memory):** Supabase entegrasyonu ile geçmiş konuşmaları hatırlar ve müşteriye ismiyle hitap ederek kaldığı yerden devam eder.
-- **📊 Gelişmiş Admin Dashboard:** Siparişleri, stok durumunu ve müşteri taleplerini real-time (anlık) olarak takip edebileceğiniz modern bir panel.
-- **🎭 Duygu Analizi (Sentiment Analysis):** Müşteri mesajlarındaki öfke veya aciliyet durumunu tespit eder ve "Kritik" etiketli talepler için yöneticileri uyarır.
+- **⚡ Real-time Takip:** Supabase Realtime entegrasyonu sayesinde siparişler, stok değişiklikleri ve destek talepleri panelinize anında yansır.
+- **📦 Tam Envanter Yönetimi:** Ürün ekleme, silme ve stok güncelleme işlemlerini panel üzerinden kolayca gerçekleştirin.
+- **🎭 Gelişmiş Duygu Analizi:** Müşteri mesajlarındaki öfke veya aciliyet durumunu tespit eder ve "Kritik" etiketli talepler için yöneticileri anında uyarır.
+- **✅ Otomatik Bildirimler:** Destek talebi çözüldüğünde veya sipariş durumu güncellendiğinde müşteriye otomatik WhatsApp bilgilendirmesi gönderilir.
+- **🧠 Bağlamsal Hafıza (Session Memory):** Geçmiş konuşmaları hatırlar ve müşteriye ismiyle hitap ederek kaldığı yerden devam eder.
 - **🔐 Güvenli Erişim:** Admin paneli için şifre korumalı giriş ve güvenli session yönetimi.
 
 ---
@@ -34,8 +62,8 @@ Geleneksel, kural tabanlı chatbotların aksine Omni-Agent; müşterinin doğal 
 ### Frontend (Yönetim Paneli)
 - **React + Vite:** Hızlı ve modüler kullanıcı arayüzü.
 - **Tailwind CSS v4:** Modern ve esnek stil yönetimi.
-- **Framer Motion:** Akıcı UI animasyonları ve geçişler.
-- **Lucide React:** Minimalist ve açıklayıcı ikon seti.
+- **Framer Motion:** Akıcı UI animasyonları ve premium geçiş efektleri.
+- **Lucide React:** Minimalist ikon seti.
 
 ---
 
@@ -61,7 +89,7 @@ graph TD
 
 ## 🚀 Hızlı Başlangıç (Kurulum)
 
-Projeyi yerel ortamınızda ayağa kaldırmak için aşağıdaki adımları izleyin.
+Projenizi yerel ortamınızda ayağa kaldırmak için aşağıdaki adımları izleyin.
 
 ### 📋 Gereksinimler
 - **Python 3.9+**
