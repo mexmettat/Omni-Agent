@@ -36,7 +36,7 @@ def check_inventory(product_name: str = "") -> str:
     result = get_product_inventory(product_name)
     return json.dumps(result, ensure_ascii=False)
 
-def create_support_ticket(phone_number: str, description: str, urgency_level: str = "Normal") -> str:
+def create_support_ticket(phone_number: str, description: str, urgency_level: str = "Normal", customer_name: str = "Bilinmiyor") -> str:
     """
     Müşteri için yeni bir destek/şikayet talebi (ticket) oluşturur.
     
@@ -44,12 +44,13 @@ def create_support_ticket(phone_number: str, description: str, urgency_level: st
         phone_number: Müşterinin telefon numarası.
         description: Şikayet veya destek talebinin detayı.
         urgency_level: Şikayetin aciliyeti/duygu durumu. Seçenekler: 'Düşük', 'Normal', 'Yüksek', 'Kritik'.
+        customer_name: Müşterinin adı (Bağlamda verilecektir).
     """
-    print(f"[Tool Execution] create_support_ticket çağrıldı: {phone_number} - {description} - {urgency_level}")
-    result = create_ticket(phone_number, description, urgency_level)
+    print(f"[Tool Execution] create_support_ticket çağrıldı: {phone_number} - {customer_name} - {description} - {urgency_level}")
+    result = create_ticket(phone_number, description, urgency_level, customer_name)
     return json.dumps(result, ensure_ascii=False)
 
-def place_order_tool(phone_number: str, product_name: str, quantity: int = 1) -> str:
+def place_order_tool(phone_number: str, product_name: str, quantity: int = 1, customer_name: str = "Bilinmiyor") -> str:
     """
     Müşterinin istediği üründen sipariş oluşturur ve stoktan düşer.
     
@@ -57,9 +58,10 @@ def place_order_tool(phone_number: str, product_name: str, quantity: int = 1) ->
         phone_number: Müşterinin telefon numarası.
         product_name: Sipariş edilecek ürünün adı.
         quantity: Kaç adet sipariş edileceği (varsayılan 1).
+        customer_name: Müşterinin adı (Bağlamda verilecektir).
     """
-    print(f"[Tool Execution] place_order_tool çağrıldı: {phone_number} - {product_name} ({quantity} adet)")
-    result = place_order(phone_number, product_name, quantity)
+    print(f"[Tool Execution] place_order_tool çağrıldı: {phone_number} - {customer_name} - {product_name} ({quantity} adet)")
+    result = place_order(phone_number, product_name, quantity, customer_name)
     return json.dumps(result, ensure_ascii=False)
 
 # Define the Gemini Model
@@ -84,7 +86,7 @@ model = genai.GenerativeModel(
 )
 
 # Start a chat session (this allows maintaining conversation history if needed, though for webhook it might be stateless per message initially)
-def process_customer_message(message: str, customer_phone: str) -> str:
+def process_customer_message(message: str, customer_phone: str, customer_name: str = "") -> str:
     """
     Müşterinin mesajını alır, LLM'e iletir ve uygun aracı çalıştırarak yanıt döndürür.
     Sohbet hafızası (history) kullanılarak LLM bağlam konusunda bilgilendirilir.
@@ -100,7 +102,7 @@ def process_customer_message(message: str, customer_phone: str) -> str:
         chat = model.start_chat(enable_automatic_function_calling=True)
         
         # Prompt'u güçlendirmek için telefon numarasını ve geçmişi sisteme bildiriyoruz
-        enhanced_message = f"(Müşteri Telefonu: {customer_phone})\n\n{history}\n\nYeni Müşteri Mesajı: {message}"
+        enhanced_message = f"(Müşteri Telefonu: {customer_phone}, Müşteri Adı: {customer_name})\n\n{history}\n\nYeni Müşteri Mesajı: {message}\n\nNot: Araçları çağırırken 'customer_name' argümanına {customer_name} değerini göndermeyi unutma."
         
         response = chat.send_message(enhanced_message)
         

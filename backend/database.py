@@ -56,11 +56,12 @@ def update_product_stock(product_id: str, new_stock: int) -> dict:
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-def create_ticket(customer_phone: str, issue_description: str, urgency_level: str = "Normal") -> dict:
+def create_ticket(customer_phone: str, issue_description: str, urgency_level: str = "Normal", customer_name: str = "Bilinmiyor") -> dict:
     """Creates a new support ticket with urgency level."""
     try:
         response = supabase.table("tickets").insert({
             "customer_phone": customer_phone,
+            "customer_name": customer_name,
             "issue_description": issue_description,
             "status": "açık",
             "urgency_level": urgency_level
@@ -83,7 +84,7 @@ def update_ticket_status(ticket_id: str, new_status: str) -> dict:
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-def place_order(customer_phone: str, product_name: str, quantity: int = 1) -> dict:
+def place_order(customer_phone: str, product_name: str, quantity: int = 1, customer_name: str = "Bilinmiyor") -> dict:
     """Places an order, decrements stock, and records the order."""
     try:
         # 1. Find the product
@@ -120,6 +121,7 @@ def place_order(customer_phone: str, product_name: str, quantity: int = 1) -> di
         order_response = supabase.table("orders").insert({
             "order_number": order_number,
             "customer_phone": customer_phone,
+            "customer_name": customer_name,
             "status": "hazırlanıyor",
             "total_amount": total_amount,
             "cargo_tracking": order_details
@@ -179,6 +181,16 @@ def add_product(name: str, price: float, stock_quantity: int) -> dict:
         if response.data:
             return {"status": "success", "product": response.data[0]}
         return {"status": "error", "message": "Ürün eklenemedi."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+def delete_product(product_id: str) -> dict:
+    """Deletes a product from the inventory by its ID."""
+    try:
+        response = supabase.table("products").delete().eq("id", product_id).execute()
+        if response.data:
+            return {"status": "success", "message": "Ürün başarıyla silindi."}
+        return {"status": "error", "message": "Ürün silinemedi veya bulunamadı."}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 

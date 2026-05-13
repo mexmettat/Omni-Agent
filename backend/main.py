@@ -5,7 +5,7 @@ from fastapi.responses import PlainTextResponse
 from twilio.twiml.messaging_response import MessagingResponse
 from twilio.rest import Client
 from agent import process_customer_message
-from database import update_product_stock, update_ticket_status, get_ticket_by_id, add_product, update_order_status, get_order_by_id
+from database import update_product_stock, update_ticket_status, get_ticket_by_id, add_product, update_order_status, get_order_by_id, delete_product
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -41,8 +41,8 @@ async def whatsapp_webhook(request: Request):
     sender = form_data.get("From", "")  # Örn: 'whatsapp:+905551234567'
     message_body = form_data.get("Body", "")
     
-    # Telefon numarasını temizle
     customer_phone = sender.replace("whatsapp:", "").strip()
+    profile_name = form_data.get("ProfileName", "")
     
     if not message_body:
         return PlainTextResponse("Boş mesaj alınamaz.", status_code=400)
@@ -50,7 +50,7 @@ async def whatsapp_webhook(request: Request):
     print(f"[{customer_phone}] Gelen Mesaj: {message_body}")
     
     # 1. Gemini Agent'a sor
-    agent_response = process_customer_message(message_body, customer_phone)
+    agent_response = process_customer_message(message_body, customer_phone, profile_name)
     
     # 2. Twilio'ya yanıt ver (TwiML kullanarak)
     twiml_response = MessagingResponse()
@@ -76,6 +76,10 @@ async def admin_add_product(data: dict):
         return {"status": "error", "message": "name, price ve stock_quantity alanları zorunludur."}
         
     return add_product(name, float(price), int(stock_quantity))
+
+@app.delete("/api/admin/products/{product_id}")
+async def admin_delete_product(product_id: str):
+    return delete_product(product_id)
 
 @app.patch("/api/admin/tickets/{ticket_id}/status")
 async def admin_update_ticket_status(ticket_id: str, data: dict):

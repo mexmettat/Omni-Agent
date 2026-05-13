@@ -14,7 +14,8 @@ import {
   Plus,
   X,
   Lock,
-  LogOut
+  LogOut,
+  Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -181,6 +182,26 @@ function App() {
       alert("Sunucuya bağlanılamadı.");
     }
     setIsAdding(false);
+  };
+
+  const handleDeleteProduct = async (id, name) => {
+    if (!window.confirm(`"${name}" ürününü silmek istediğinize emin misiniz?`)) return;
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/admin/products/${id}`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        setProducts(prev => prev.filter(p => p.id !== id));
+        alert("Ürün başarıyla silindi! 🗑️");
+      } else {
+        alert("Hata: " + result.message);
+      }
+    } catch (error) {
+      console.error("Delete product error:", error);
+      alert("Sunucuya bağlanılamadı.");
+    }
   };
 
   const handleResolveTicket = async (id) => {
@@ -432,6 +453,13 @@ function App() {
                                 title="Stok Güncelle"
                               >
                                 <RefreshCw size={14} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteProduct(product.id, product.name)}
+                                className="p-1.5 hover:bg-rose-500/20 rounded-lg text-rose-400 transition-colors"
+                                title="Ürünü Sil"
+                              >
+                                <Trash2 size={14} />
                               </button>
                             </div>
                           </td>
