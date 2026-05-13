@@ -95,10 +95,14 @@ async def admin_update_ticket_status(ticket_id: str, data: dict):
         ticket_data = get_ticket_by_id(ticket_id)
         if ticket_data["status"] == "success":
             phone = ticket_data["ticket"]["customer_phone"]
-            if twilio_client:
+            tw_sid = os.getenv("TWILIO_ACCOUNT_SID")
+            tw_token = os.getenv("TWILIO_AUTH_TOKEN")
+            tw_client = Client(tw_sid, tw_token) if tw_sid and tw_token else None
+            
+            if tw_client:
                 try:
                     message_text = f"Merhaba, destek talebiniz çözüldü olarak işaretlendi. Teşekkür ederiz! ✅"
-                    twilio_client.messages.create(
+                    tw_client.messages.create(
                         from_='whatsapp:+14155238886',  # Sandbox number or your Twilio number
                         body=message_text,
                         to=f'whatsapp:{phone}'
@@ -126,7 +130,11 @@ async def admin_update_order_status(order_id: str, data: dict):
         if order_data["status"] == "success":
             phone = order_data["order"]["customer_phone"]
             order_number = order_data["order"]["order_number"]
-            if twilio_client:
+            tw_sid = os.getenv("TWILIO_ACCOUNT_SID")
+            tw_token = os.getenv("TWILIO_AUTH_TOKEN")
+            tw_client = Client(tw_sid, tw_token) if tw_sid and tw_token else None
+            
+            if tw_client:
                 try:
                     message_text = f"Merhaba! {order_number} numaralı siparişinizin durumu güncellendi: *{new_status.upper()}* 📦"
                     if new_status == "kargoda":
@@ -134,7 +142,7 @@ async def admin_update_order_status(order_id: str, data: dict):
                     elif new_status == "teslim edildi":
                         message_text = f"Harika haber! {order_number} numaralı siparişiniz teslim edildi. Bizi tercih ettiğiniz için teşekkürler! ✅"
                     
-                    twilio_client.messages.create(
+                    tw_client.messages.create(
                         from_='whatsapp:+14155238886',
                         body=message_text,
                         to=f'whatsapp:{phone}'

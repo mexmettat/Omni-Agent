@@ -61,7 +61,6 @@ def create_ticket(customer_phone: str, issue_description: str, urgency_level: st
     try:
         response = supabase.table("tickets").insert({
             "customer_phone": customer_phone,
-            "customer_name": customer_name,
             "issue_description": issue_description,
             "status": "açık",
             "urgency_level": urgency_level
