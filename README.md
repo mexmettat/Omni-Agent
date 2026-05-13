@@ -12,6 +12,18 @@ Geleneksel, kural tabanlı chatbotların aksine Omni-Agent; müşterinin doğal 
 
 ---
 
+## 🎥 Tanıtım Videosu
+
+*(1 Dakikalık Proje Sunum ve Demo Videosu)*
+
+<div align="center">
+  <a href="https://youtu.be/3KsZMEvsM3c">
+    <img src="https://img.youtube.com/vi/3KsZMEvsM3c/maxresdefault.jpg" alt="Omni-Agent Tanıtım Videosu" width="800" />
+  </a>
+</div>
+
+---
+
 ## 📸 Proje Görünümü
 
 ### 🖥️ Yönetim Paneli (Admin Dashboard)
